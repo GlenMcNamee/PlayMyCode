@@ -1,0 +1,62 @@
+/* 
+ * MoonPac
+ * By Glen McNamee
+ *
+ * 
+ */
+ 
+setFont( 'Arial', 32, 'italic' )
+
+// Global Veribles
+$spritesheet = new Image("gfx.png")
+$gamemode = 2
+$x=343
+$y=312
+$speed = 1
+$thrust = 0 
+
+// The code inside this do block is run each frame
+onEachFrame() do
+
+    if $gamemode == 2
+    _background()
+    _player()
+     fillText ( $x+" "+$y+" "+$thrust,10, 0 )
+    end
+end
+
+def _background()
+    fill( :black )
+	drawImage ($spritesheet, 0, 0, 256, 8, 53, 360, 512, 16 )
+	drawImage ($spritesheet, 0, 8, 48, 8, 117, 135, 96, 16 )
+	drawImage ($spritesheet, 48, 8, 32, 8, 293, 183, 64, 16 )
+	drawImage ($spritesheet, 80, 8, 48, 8, 436, 87, 96, 16 )
+end
+def _player()
+	if getControls().isKeyDown( :d ) or getControls().isKeyDown( :right )
+            $x = $x+$speed
+
+         end
+         if getControls().isKeyDown( :a ) or getControls().isKeyDown( :left )
+            $x = $x-$speed
+
+         end
+         if getControls().isKeyDown( :w ) or getControls().isKeyDown( :up )
+            $thrust = $thrust + 1
+
+        end
+        if getControls().isKeyDown( :s ) or getControls().isKeyDown( :down )
+            $thrust = 0
+        end
+        
+	    if $thrust > 0 
+            $y=$y-4 
+            $thrust = $thrust - 1 
+        else
+            $thurst = 0 
+            $y=$y+.25
+
+        end
+    drawImage ($spritesheet, 0, 32, 16, 24, $x, $y, 32, 48 )
+end
+

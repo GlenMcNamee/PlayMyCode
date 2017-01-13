@@ -1,0 +1,656 @@
+/* 
+ * Bouldercraft
+ * By Glen McNamee
+ *
+ * 
+ */
+
+setFont( 'Arial', 10 )
+
+//$terrainIMG     = new Image( "terrain.png" )
+$level_images =[new Image( "level0.png" ),new Image( "level1.png" ),new Image( "level2.png" ),new Image( "level3.png" ),new Image( "level4.png" ),new Image( "Level5.png" ),new Image( "Level6.png" ),new Image( "Level7.png" ),new Image( "Level8.png" ),new Image( "Level9.png" )]
+$credit_images = [new Image( "credit4.png" ),new Image( "credit1.png" ),new Image( "credit5.png" ),new Image( "credit2.png" ),new Image( "credit3.png" )]
+$level_dia = [5,4,2,12,32,25,1,50,35,45]
+playerImage = new Image( "mainman.png" )
+$spritesheet = new Image("spritesheet3.png")
+$gamemode = 0
+$point = 0
+$music = new Sound( 'Boulder Craft Music.mp3') 
+$intro1     = new Image( "intro1.png" )
+$intro2     = new Image( "intro2.png" )
+$logo     = new Image( "logo2.png" )
+$logo1     = new Image( "spacetostart.png" )
+$gameover     = new Image( "gameover.png" )
+$winner     = new Image( "winner.png" )
+$1gamlogo     = new Image( "1gamlogo.png" )
+
+$level = 0
+$water = 0 
+// main loop
+
+
+// Global Veribles
+$speed = .25
+$wspeed = 40
+
+$obj=[]
+$x=[]
+$y=[]
+$maxobj = 0
+$maxitm = 0
+$alive = []
+$lives = 3
+
+
+
+$map = []
+$d = []
+$dia = 0
+
+$map2 = [
+ 
+ [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+ [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+ [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+ [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+ [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+ [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+ [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+ [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+ [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+ [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+ [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+ [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+ [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+ [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+ [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], 
+ [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+ [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+ [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+ [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+ [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], 
+ [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+ [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+ [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+ [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+ [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+ [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+]
+$newmap = []
+$plyx = 1
+$plyy = 1
+
+onEachFrame() do
+    fill( :black )
+
+    // title screen
+    if $gamemode == 0
+        if $point < 1 
+            $gameTime = getTime()
+            $point = 1
+        end
+
+        $point =  (getTime() - $gameTime)/10+1
+        
+        
+
+ 
+        if $point < 174 
+            fill( :white )
+            setColor( :white, $point/175 )
+            drawImage ($intro1, -400+($point*3), 196, false )
+            drawImage ($intro2, 700-($point*3), 240, false )
+        end
+        if $point > 173 and $point < 201
+            fill( :white )
+            drawImage ($intro1, 124, 196, false )
+            drawImage ($intro2, 191, 240, false )
+        end
+        if $point > 200
+            fill( 455-$point,455-$point,455-$point )
+             setColor( 455-$point,455-$point,455-$point, 1 )
+            drawImage ($intro1, 124, 196, false )
+            drawImage ($intro2, 191, 240, false )
+        end
+        
+        if $point > 555
+            $point = 0
+            $gamemode = 8
+            setColor (:white, 1)
+        end
+            
+      
+
+        end
+        
+    if $gamemode == 8  
+            fill (:black)
+            if $point < 1 
+                $gameTime = getTime()
+                $point = 1
+            end       
+            $point =  (getTime() - $gameTime)/10+1
+        if $point < 255
+            setColor( $point,$point,$point, 1 )
+        end
+        if $point > 510
+            setColor( 765-$point,765-$point,765-$point, 1 )
+        end        
+        drawImage( $1gamlogo, 0, 0 )
+        if $point > 1000
+            $point = 0
+            $gamemode = 1
+        end
+    end 
+    
+    if $gamemode == 1
+            fill (:black)
+            if $point < 1 
+                $gameTime = getTime()
+                $point = 1
+                $music.play() 
+                cred = 0 
+            end
+            $point =  (getTime() - $gameTime)/10+1
+
+           //  $credit_images 
+
+             drawImage( $logo, 10, 10 )
+             drawImage( $logo1, 194, 329 )
+            setColor (:white, 1)
+        
+        if $point < 255
+            setColor( $point,$point,$point, 1 )
+        end
+        if $point > 510
+            setColor( 765-$point,765-$point,765-$point, 1 )
+        end
+        if $point > 1000
+            $gameTime = getTime()
+            $point = 1
+            cred = cred + 1
+            if cred > 3
+                cred = 0
+            end
+        end
+
+            drawImage ($credit_images[cred], 310, 200, true )
+             
+           if getControls().isKeyDown( :space ) 
+               $lives = 3
+               $level = 0
+               $point = 0
+            $gamemode = 2
+            end
+    end
+    // Draw Level 
+    if $gamemode == 2
+        _readmap()
+        $dead = 0
+         $gamemode = 3
+    end
+    // Main Game Loop
+    if $gamemode == 3
+        _newdraw()
+        _checkswater()
+        _moveobjs()        
+        //_reportmoust()
+    end
+    // end game. 
+    if $gamemode == 4
+        _newdraw()
+        _checkswater()
+        drawImage ($winner  , 310, 200, true )
+        if getControls().isKeyDown( :space ) 
+            $gamemode = 1 
+        end
+    end
+end
+
+def _moveobjs()
+        obj = 0
+        alive = 0
+        while obj < $maxobj 
+  
+            if $alive[obj] == 1
+                if $obj[obj] > 9 and $obj[obj] < 13
+                    if $map2[$y[obj]-1][$x[obj]] == 2 or $map2[$y[obj]+1][$x[obj]] == 2 or $map2[$y[obj]][$x[obj]-1] == 2 or $map2[$y[obj]][$x[obj]+1] == 2
+                        _exo($y[obj],$x[obj])
+                    end
+                end
+                if $obj[obj] == 10 
+                    _humon(obj)                       
+                    alive = 1
+                end 
+                if $obj[obj] == 11 or $obj[obj] == 12
+                    _objs(obj)
+                end 
+                if $obj[obj] == 13 or $obj[obj] == 14
+                    _grav(obj)
+                end 
+            end
+            obj = obj + 1
+        end 
+        if alive == 0
+            $dead = $dead + 1 
+            if $dead > 100 
+            $lives = $lives - 1
+            if $lives > 0
+                    $gamemode = 2 
+            else
+                drawImage ($gameover, 310, 200, true )
+                $lives = 0
+                if $dead > 200 
+                $gamemode = 1
+             end
+            end
+            end
+        end
+end 
+
+
+
+def _humon(obj)
+
+        $map2[$y[obj]][$x[obj]] = 0
+        
+        $d[obj] = 0
+         if getControls().isKeyDown( :d ) or getControls().isKeyDown( :right )
+            nx = $x[obj]+$speed
+            ny = $y[obj]
+            $d[obj] = 1
+         end
+         if getControls().isKeyDown( :a ) or getControls().isKeyDown( :left )
+            nx = $x[obj]-$speed
+            ny = $y[obj]
+            $d[obj] = 2 
+         end
+         if getControls().isKeyDown( :w ) or getControls().isKeyDown( :up )
+            nx = $x[obj] 
+            ny = $y[obj]-$speed
+            $d[obj] = 3
+        end
+        if getControls().isKeyDown( :s ) or getControls().isKeyDown( :down )
+            nx = $x[obj] 
+            ny = $y[obj]+$speed
+            $d[obj] = 4
+        end
+        
+
+        
+        if $map2[ny][nx] > 10 
+            if $obj[$map2[ny][nx]-10]==14 
+                
+                $dia = $dia + 1
+                $alive[$map2[ny][nx]-10]=0
+                $map2[ny][nx] = 0
+
+            else 
+            if $obj[$map2[ny][nx]-10]==13
+                if $d[obj] == 1 and $map2[ny][nx+1]==0
+                    old = $map2[ny][nx]-10
+                    $map2[ny][nx] = 0
+                    $x[old] = $x[old]+($speed/2)
+                    $map2[ny][$x[old]] = old+10
+                end
+                if $d[obj] == 2 and $map2[ny][nx-1]==0
+                   old = $map2[ny][nx]-10
+                    $map2[ny][nx] = 0
+                    $x[old] = $x[old]-($speed/2)
+                    $map2[ny][$x[old]] = old+10
+                end 
+                nx =  $x[obj]
+                ny = $y[obj]
+            end 
+            end
+            
+        end
+        
+        if $map2[ny][nx] < 2 
+           $x[obj] = nx
+           $y[obj] = ny
+        end 
+        
+        if $map2[ny][nx] == 6
+            if $dia > $maxdia-1
+                $level = $level +1 
+                if $level < 10 
+                    $gamemode = 2
+                else 
+                    $gamemode = 4
+                end
+                $x[obj] = nx
+                $y[obj] = ny
+            end     
+        end        
+
+        $map2[$y[obj]][$x[obj]] = 10+obj
+        
+end 
+
+def _grav(obj)
+
+    $map2[$y[obj]][$x[obj]] = 0
+         
+    below = $map2[$y[obj]+1][$x[obj]]
+    
+    if $d[obj]==1 and below > 9 
+        if $obj[below-10] > 9 and $obj[below-10] < 13
+            $d[obj] = 0 
+            $alive[obj]=0
+            _exo($y[obj]+1,$x[obj])
+        end
+    end
+
+        if below == 0 
+            $y[obj] = $y[obj]+$speed  
+            $d[obj] = 1
+        else
+            $d[obj] = 0
+            if below > 9 
+                if $obj[below-10] > 12 and $obj[below-10] < 15               
+                    if $map2[$y[obj]+1][$x[obj]+1] == 0 and $map2[$y[obj]][$x[obj]+1] == 0 
+                        $x[obj] = $x[obj]+1                  
+                    else
+                        if $map2[$y[obj]+1][$x[obj]-1] == 0 and $map2[$y[obj]][$x[obj]-1] == 0 
+                            $x[obj] = $x[obj]-1  
+                        end                
+                    end
+                end
+            end
+        end
+
+    if $alive[obj] == 1
+        $map2[$y[obj]][$x[obj]] = 10+obj
+    end
+    
+end
+
+def _objs(obj)
+
+        $map2[$y[obj]][$x[obj]] = 0
+
+
+                    if $d[obj] == 3 and $obj[obj]==12
+                        nx = $x[obj]+$speed
+                        ny = $y[obj]
+                    end
+                    if $d[obj] == 1 and $obj[obj]==12
+                        nx = $x[obj]-$speed
+                        ny = $y[obj]
+                    end
+                    if $d[obj] == 2 and $obj[obj]==12
+                        nx = $x[obj] 
+                        ny = $y[obj]-$speed
+                    end
+                    if $d[obj] == 0 and $obj[obj]==12
+                        nx = $x[obj] 
+                        ny = $y[obj]+$speed
+                    end
+
+
+
+                    if $d[obj] == 0 and $obj[obj]==11
+                        nx = $x[obj]+$speed
+                        ny = $y[obj]
+                    end
+                    if $d[obj] == 2 and $obj[obj]==11
+                        nx = $x[obj]-$speed
+                        ny = $y[obj]
+                    end
+                    if $d[obj] == 1 and $obj[obj]==11
+                        nx = $x[obj] 
+                        ny = $y[obj]-$speed
+                    end
+                    if $d[obj] == 3 and $obj[obj]==11
+                        nx = $x[obj] 
+                        ny = $y[obj]+$speed
+                    end
+                    
+                    if $map2[ny][nx] == 10
+                        _exo(ny,nx) 
+                        $obj[obj] = 14 
+                    end
+                    
+                    if $map2[ny][nx] == 0
+                        $x[obj]=nx
+                        $y[obj]=ny
+                    else 
+                        $d[obj] = $d[obj] + 1
+                        if $d[obj] == 4
+                            $d[obj] = 0
+                        end
+                    end
+
+         
+        $map2[$y[obj]][$x[obj]] = 10+obj
+end 
+
+
+def _readmap()
+    obj = 0 
+    $maxdia = 0
+    $dia = 0
+    mapIMG = $level_images[$level]
+   
+    x = 0 
+        y = 0
+        while y < 25
+            arr = x+(y*40)
+            $map[arr] = 0
+            obj2 = 0 
+            itm = 0 
+            pixel = mapIMG.getpixel(x,y)
+            if pixel == -3384890 
+                $map[arr] = 4
+            end
+            if pixel == -16711936
+                $map[arr] = 1
+            end
+            if pixel == -16494073
+                $map[arr] = 3
+            end
+            if pixel == -528807
+                $map[arr] = 13       
+            end
+            if pixel == -12503091
+                $map[arr] = 2
+            end
+            if pixel == -7632246
+                $map[arr] = 14
+            end 
+            if pixel == -10289087
+                $map[arr] = 6
+            end 
+            if pixel == -64000
+                $map[arr] = 10
+                obj2 = 10 
+            end 
+            if pixel == -31231
+                $map[arr] = 11
+            end 
+            if pixel == -65368
+                $map[arr] = 12
+            end            
+            if $map[arr] > 9
+                $obj[obj] =  $map[arr]
+                $y[obj] = y
+                $x[obj] = x
+                $d[obj] = 0
+                $map[arr] = 10+obj
+                $alive[obj]=1
+                obj = obj + 1                
+            end
+            $map2[y][x] = $map[arr] 
+            x = x + 1
+            if x == 39
+                x = 0
+                y = y + 1
+            end
+            $maxdia = $level_dia[$level]
+            $maxobj = obj
+        end            
+end 
+    
+def _newdraw()
+                $water=$water+1
+        if $water > 21
+            $water = 0
+        end
+        anim = ($water/3).ceil()
+        
+        x = 0 
+        y = 0
+        while y < 25            
+            if $map2[y][x]==1 
+                drawImage ($spritesheet, 16, 112, 16, 16, (x*16)-2, (y*16) )
+            end
+            if $map2[y][x]==2
+                drawImage ($spritesheet, (anim *16), 128, 16, 16, (x*16)-2, (y*16) )
+            end
+            
+            if $map2[y][x]==3
+                drawImage ($spritesheet, 48, 96, 16, 16, (x*16)-2, (y*16) )
+            end              
+            
+            if $map2[y][x]==4
+                drawImage ($spritesheet, 16, 96, 16, 16, (x*16)-2, (y*16) )
+            end       
+            
+             if $map2[y][x]==6
+                if $dia < $maxdia 
+                    drawImage ($spritesheet, 16, 96, 16, 16, (x*16)-2, (y*16) )
+                else
+                    drawImage ($spritesheet, 32, 96, 16, 16, (x*16)-2, (y*16) )
+                end
+            end  
+            
+            if $map2[y][x]>9
+                obj = $map2[y][x]-10
+            
+                if $obj[obj]==10
+            if $d[obj] == 0
+				drawImage ($spritesheet, 0, 0, 16, 16, (x*16)-2, (y*16) )
+			end
+			if $d[obj] == 1
+				drawImage ($spritesheet, (anim *16), 49, 16, 16, (x*16)-2, (y*16) )
+			end
+			if $d[obj] == 2
+				drawImage ($spritesheet, (anim *16), 65, 16, 16, (x*16)-2, (y*16) )
+			end
+			if $d[obj] == 3
+				drawImage ($spritesheet, 32+(anim.wrap(2) *16) , 32, 16, 16, (x*16)-2, (y*16) )
+			end
+			if $d[obj] == 4
+				drawImage ($spritesheet, 0+(anim.wrap(2) *16), 32, 16, 16, (x*16)-2, (y*16) )
+			end
+                end 
+                if $obj[obj]==11
+                    drawImage ($spritesheet, (anim *16), 144, 16, 16, (x*16)-2, (y*16) )
+                end 
+                if $obj[obj]==12
+                    drawImage ($spritesheet, (anim *16), 176, 16, 16, (x*16)-2, (y*16) )
+                end 
+                if $obj[obj]==13
+                    drawImage ($spritesheet, 0, 112, 16, 16, (x*16)-2, (y*16) )
+                end   
+                if $obj[obj]==14
+                    drawImage ($spritesheet, 0, 160, 16, 16, (x*16)-2, (y*16) )
+                end 
+                if $obj[obj]>14 and $obj[obj]<21
+                    drawImage ($spritesheet, 16+((($obj[obj]-14)*16)), 112, 16, 16, (x*16)-2, (y*16) )
+                    $obj[obj] = $obj[obj] + 1
+                    if $obj[obj] == 21
+                        $obj[obj] = 14
+                    end
+                end 
+            end
+            x = x + 1
+            if x == 39
+                x = 0
+                y = y + 1
+            end
+        end
+        fillText ( "Lives "+$lives,10, 384 )
+        fillText ( "Level "+$level,250, 384 )
+        fillText ( "Diamonds "+$dia+"/"+$maxdia,500, 384 )
+end    
+
+
+def _exo(ny,nx)
+    x = 0 
+    y = 0  
+    while y < 3
+        xx = nx-1+x
+        yy = ny-1+y 
+        if $map2[yy][xx] > 9
+            $obj[-10+$map2[yy][xx]] = 15
+        end
+        if $map2[ny-1+y][nx-1+x] < 4 
+                obj = $maxobj
+                $obj[obj] =  15
+                $y[obj] = ny-1+y
+                $x[obj] = nx-1+x
+                $d[obj] = 0            
+                $map2[ny-1+y][nx-1+x] = obj+10
+                $maxobj=$maxobj+1
+                $alive[obj]=1
+        end
+        x = x + 1
+        if x == 3
+           x = 0
+           y = y + 1
+        end
+    end
+  
+end 
+
+def _checkswater()
+
+        x = 1 
+        y = 1
+
+        while y < 25
+            if $map2[y][x] == 2 
+                if rand (0,$wspeed).ceil() == 1      
+                rnda = rand (0,4).ceil()
+                    if rnda == 1 
+                        nx = x+1 
+                        ny = y
+                    end
+                    if rnda == 2 
+                        nx = x-1 
+                        ny = y
+                    end
+                    if rnda == 3 
+                        nx = x 
+                        ny = y-1
+                    end
+                    if rnda == 4 
+                        nx = x 
+                        ny = y+1
+                    end
+                    if $map2[ny][nx] == 0
+                       $map2[ny][nx] = 2 
+                    end
+                end
+           end 
+            x = x + 1
+            if x == 39
+                x = 0
+                y = y + 1
+            end
+        end
+end 
+
+def _reportmoust()
+
+    xx = -1+(getControls().getMouseX()/16).ceil()
+    yy = -1+(getControls().getMouseY()/16).ceil()
+                arr = xx+(yy*40)
+
+           fillText( xx , 170, 366 )
+           fillText( yy , 220, 366 )
+          fillText( $map2[yy][xx]+" "+$obj[$map2[yy][xx]-10] , 10, 326 )
+
+end 

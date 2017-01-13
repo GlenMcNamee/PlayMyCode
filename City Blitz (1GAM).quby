@@ -1,0 +1,333 @@
+/* 
+ * City Blitz Basic - PlayMyCode Version 1.10b
+ * Based on Obscure Blitz Amiga based on Blitz Vic-20 by Commodore UK
+ *
+ * Project to learning coding after not coding anything since 1997
+ * Code by Glen McNamee - c64glen.com - @glenmcnamee
+ * Graphics by  Glen McNamee - c64glen.com - @glenmcnamee
+ * Music by Anthony Putson - orchestralmedia.co.uk - @anthonyputson
+ * 
+ */
+
+setFont( 'Arial', 32, 'italic' )
+
+$imgplane       = new Image( "bip.png" )
+$credit_images = [new Image( "credit1.png" ),new Image( "credit2.png" ),new Image( "credit3.png" )]
+$intro1     = new Image( "intro1.png" )
+$intro2     = new Image( "intro2.png" )
+$1gamlogo     = new Image( "1gamlogo.png" )
+
+$imgbomb      = new Image( "Bomb" )
+$imgtitle      = new Image( "cbb-title2.png" )
+$imggameover      = new Image( "cbb-gameover.png" )
+$imgleveldone      = new Image( "cbb-leveldone.png")
+$imggamedone      = new Image( "cbb-gamedone.png")
+$floor      = new Image( "floor.png")
+$buildImg = new Image( "block1.png")
+$blocks = new Image( "blocks.png")
+$cx = []
+$cy = []
+$point = 0
+
+$music = new Sound( 'mod.blitztime2!_T01_MIX.mp3' )
+
+$buildHH  = [
+ [0,0,1,2,2,0,2,1,0,1,1,0],
+[0,1,2,3,2,1,0,2,3,0,1,0],
+ [0,1,2,2,3,3,2,0,2,3,0,2],
+[1,1,2,2,3,3,2,3,2,3,1,2],
+[3,2,2,4,3,3,1,2,3,3,2,2],
+[4,2,3,3,2,4,5,4,3,4,3,3],
+[4,5,4,3,5,4,5,3,3,5,4,5],
+  [5,5,5,5,5,5,5,5,5,5,5,5]
+  ]
+  
+$buildY = [368,336,280,240,144]
+
+$clouds = [new Image( "cloud_1.png" ),new Image( "cloud_2.png" ),new Image( "cloud_3.png" )]
+$cityname = [new Image( "city1.png" ),new Image( "city2.png" ),new Image( "city3.png" ),new Image( "city4.png" ),new Image( "city5.png" ),new Image( "city6.png" ),new Image( "city7.png" ),new Image( "city8.png" )]
+
+
+
+// The code inside this do block is run each frame
+$gamemode=9
+onEachFrame() do
+    //if music.isPlaying() == FALSE 
+        //music.play()
+    //end    
+
+    fill( :blue )
+    
+    if $gamemode == 9
+        if $point < 1 
+            $gameTime = getTime()
+            $point = 1
+        end
+
+        $point =  (getTime() - $gameTime)/10+1
+        
+        
+
+ 
+        if $point < 174 
+            fill( :white )
+            setColor( :white, $point/175 )
+            drawImage ($intro1, -400+($point*3), 196, false )
+            drawImage ($intro2, 700-($point*3), 240, false )
+        end
+        if $point > 173 and $point < 201
+            fill( :white )
+            drawImage ($intro1, 124, 196, false )
+            drawImage ($intro2, 191, 240, false )
+        end
+        if $point > 200
+            fill( 455-$point,455-$point,455-$point )
+             setColor( 455-$point,455-$point,455-$point, 1 )
+            drawImage ($intro1, 124, 196, false )
+            drawImage ($intro2, 191, 240, false )
+        end
+        
+        if $point > 555
+            $point = 0
+            $gamemode = 8
+            setColor (:white, 1)
+        end
+            
+      
+
+        end
+    //onegameamonth logo    
+    if $gamemode == 8  
+            fill (:black)
+            if $point < 1 
+                $gameTime = getTime()
+                $point = 1
+            end       
+            $point =  (getTime() - $gameTime)/10+1
+        if $point < 255
+            setColor( $point,$point,$point, 1 )
+        end
+        if $point > 510
+            setColor( 765-$point,765-$point,765-$point, 1 )
+        end        
+        drawImage( $1gamlogo, 0, 0 )
+        if $point > 1000
+            $point = 0
+            $gamemode = 0
+        end
+    end 
+    
+    
+    
+    if ($gamemode ==0) 
+
+        //Set default Varibles.
+        $level = 1
+        $speed = 2    
+        // Title screen
+        
+        if $point < 1 
+                $gameTime = getTime()
+                $point = 1
+                $music.play() 
+                cred = 0 
+            end
+            $point =  (getTime() - $gameTime)/10+1
+
+           //  $credit_images 
+
+        fill( :blue )
+        setColor( :white )
+        drawImage( $imgtitle , 170, 76, false )
+        
+        if $point < 255
+            //setColor( $point,$point,$point, 1 )
+            setalpha($point/255)
+        end
+        if $point > 510
+            //setColor( 765-$point,765-$point,765-$point, 1 )
+            setalpha((765-$point)/255)
+        end
+        if $point > 1000
+            $gameTime = getTime()
+            $point = 1
+            cred = cred + 1
+            if cred > 2
+                cred = 0
+            end
+        end
+
+            drawImage ($credit_images[cred], 310, 250, true )
+             
+           if getControls().isLeftClick() or getControls().isKeyDown( :space )
+               $music.stop() 
+                _initlevel()
+                $gamemode =1
+            end
+        
+        
+        
+
+        //Check for Game start
+        if getControls().isLeftClick() or getControls().isKeyDown( :space )
+            _initlevel()
+            $gamemode =1
+        end 
+    end 
+        
+    
+    if ($gamemode == 1)
+        // Main Game Loop
+    
+        //First Draw Background and Level Text
+        //fillText( "Level "+$level, 240, 2 )
+        drawImage( $cityname[$level-1] , 310, 15, true )
+        
+        //Draw Buildings
+        _drawbuildings()
+        
+        //Move and Draw Plane
+        _moveplane()
+
+        //Draw Bomb
+        if ($bombD == 1)
+             _bombfall()
+        end 
+
+        //Check if Level is Complete 
+        if $buildHLT[0]+$buildHLT[1]+$buildHLT[2]+$buildHLT[3]+$buildHLT[4]+$buildHLT[5]+$buildHLT[6]+$buildHLT[7]+$buildHLT[8]+$buildHLT[9]+$buildHLT[10]+$buildHLT[11]+$buildHLT[12] < 1 
+            $gamemode = 3
+        end 
+    end
+
+        
+    // Death        
+    if ($gamemode == 2)
+        _endgame()
+    end    
+    
+    // Win
+    if ($gamemode == 3)
+        _endlevel()
+    end
+end
+
+def _bombfall()
+    $bombY = $bombY + 2
+    drawImage( $imgbomb , $bombX, $bombY, false )
+    if $bombY > 400 
+        $bombD = 0
+    end     
+end
+
+def _moveplane()
+    $planeX = $planeX + $speed
+    if $planeX > 644
+        $planeX = -64
+        $planeY = $planeY + 20
+    end  
+    drawImage( $imgplane, $planeX, $planeY , false )
+    if getControls().isLeftClick() or getControls().isKeyDown( :space )                 
+        if ($bombD < 1 and $planeX > 20 and $planeX < 640)
+            $bombD = 1
+            $bombX = $planeX 
+            $bombY = $planeY + 20
+        end
+    end
+end
+
+def _endlevel()
+    if $level < 8 
+        // Level Complete
+        drawImage( $imgleveldone , 162, 142, false )
+    else
+        // Game Complete
+        drawImage( $imggamedone  , 162, 123, false )
+    end
+    if getControls().isLeftClick() or getControls().isKeyDown( :space )
+        if $level < 8 
+            $level = $level + 1
+            _initlevel()  
+            $gamemode = 1
+        else
+            $gamemode = 0
+        end 
+    end  
+end 
+
+def _endgame()
+    // Game Over 
+    drawImage( $imggameover , 216, 181, false )
+    if getControls().isLeftClick() or getControls().isKeyDown( :space )
+        $gamemode = 0
+    end 
+end 
+    
+def _initlevel()
+    $planeX = -64
+    $planeY = 32
+    $bombX = -64
+    $bombY = 32
+    ll = $level-1
+    $buildHLT = [$buildHH[ll][0],$buildHH[ll][1],$buildHH[ll][2],$buildHH[ll][3],$buildHH[ll][4],$buildHH[ll][5],$buildHH[ll][6],$buildHH[ll][7],$buildHH[ll][8],$buildHH[ll][9],$buildHH[ll][10],$buildHH[ll][11]]
+    $bombD = 0
+    $cx[0] = rand( 0, 400 ) 
+    $cy[0] = rand( 0, 200 ) 
+    $cx[1] = rand( 0, 400 ) 
+    $cy[1] = rand( 0, 200 ) 
+    $cx[2] = rand( 0, 400 ) 
+    $cy[2] = rand( 0, 200 ) 
+    
+end
+
+// draw the old buildings
+def _drawbuildings()
+    
+    setAlpha( .5 )
+    drawImage( $clouds[1] , 100+$cx[0], 10+$cy[0], false )
+    setAlpha( .3 )
+    drawImage( $clouds[0] , 100+$cx[1], 10+$cy[1], false )
+    setAlpha( .7 )
+    drawImage( $clouds[2] , 100+$cx[2], 10+$cy[2], false )
+    setAlpha( 1 )
+    drawImage( $floor , 0, 355, false )
+    buildS = 0
+    $plancol = 0 
+    loop  
+        buildT = $buildHH [$level-1][buildS]
+            
+        If (buildT > 0 and $buildHLT[buildS] > 0)
+        
+            
+            YY = $buildY[buildT-1]
+            
+            //Draw Building
+            //drawImage( buildimage , 28+(builds*48), YY-16, false )
+            bHeight = 1
+            while bHeight < $buildHLT[buildS]
+                //drawImage( $buildImg, 28+(builds*48), 387-(bHeight*32), false )
+                drawImage( $blocks,  32*buildS, 0, 32, 32, 28+(builds*48), 387-(bHeight*32), false )
+                bHeight = bHeight +1 
+            end 
+            
+            drawImage( $blocks,  32*buildS, 0, 32, 32, 28+(builds*48), 387-(bHeight*32), false )
+            
+            
+            //drawImage( $blocks,  0, 0, 32, 32, x, y, 64, 64 )
+            
+            // Check for Plane Collusion! 
+            //if buildimage.isPixelOverlap( 28+(builds*48), YY, $imgplane, $planeX, $planeY, false )
+            if $buildImg.isPixelOverlap( 28+(builds*48), 387-(bHeight*32), $imgplane, $planeX, $planeY, false )
+                $gamemode = 2
+            end 
+            
+            // Check for Bomb Collusion! 
+            if ($bombD == 1 and $buildImg.isPixelOverlap( 28+(builds*48), 387-(bHeight*32), $imgbomb , $bombX, $bombY, false ))
+                $buildHLT[buildS] = $buildHLT[buildS] - 1 ;  
+                $bombD = 0
+            end              
+        end
+        buildS = buildS + 1
+    end until buildS > 11
+end
+

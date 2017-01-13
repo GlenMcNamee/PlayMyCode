@@ -1,0 +1,509 @@
+/* 
+ * Spectrum Game V1.0b
+ * By Glen McNamee.
+ *
+ * Made for #SpeccyJam and #OneGameAMonth
+ * 
+ * To Do;
+ * Sound Effects
+ * Level Transitions
+ * More Levels
+ * Shooting?
+ * Intro
+ * Convert Players to Object
+ * Convert NPC to Objects
+ * Convert Nuggers to Object
+ * Fix colusion detection when traveling up ladders
+ * 
+ */
+ 
+setFont( 'Arial', 16, 'italic' )
+ 
+
+$gamemode = 1
+//$level = 3
+
+$fade = 0 
+$map = []
+$d = []
+$dia = 0
+$alive = 0 
+
+$map2 = [
+ 
+ [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+ [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+ [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+ [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+ [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+ [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+ [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+ [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+ [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+ [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+ [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+ [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+ [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+ [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+ [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+ [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], 
+ [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+ [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+ [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+ [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+ [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], 
+ [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+ [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+ [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+ [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+ [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+ [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+]
+$newmap = []
+$plyx = 1
+$plyy = 1
+$ox = []
+$oy = []
+$fireloc = []
+$move = []
+$d = []
+$anim = []
+
+$point = 0 
+
+$level_images = [new Image( "level1.png" ),new Image( "level2.png" ),new Image( "level3.png" ),new Image( "level4.png" )]
+$sprites = new Image("ter2.png")
+$mainsprite = new Image("mono2.gif")
+$col1 = new Image("col.png")
+$col2 = new Image("col.png")
+$titlescreen = new Image("title.png")
+$winner = new Image("winner.png")
+$levg = new Image("level.png")
+$numbs = new Image("numbers.png")
+
+
+onEachFrame() do
+    if $gamemode > 0 then fill( 0,0,255) end
+
+    // title screen
+   
+    
+    // Title Screen
+   if $gamemode == 1
+
+       
+       if $fade < 255
+           
+       // setalpha ( $fade/100 )
+        $fade = $fade +1 
+    end
+    if $fade > 299
+        //setalpha ( (400-$fade)/100 )    
+          $fade = $fade +1 
+    end    
+    drawImage( $titlescreen, 48, 8,  false  )  
+        if getControls().isLeftClick() or getControls().isKeyDown( :space )
+            if $fade < 300 
+                $fade = 300
+            else
+                $fade = $fade + 25
+            end
+        end 
+   
+        if $fade > 400
+         $gamemode =2
+            $point = 0
+            $level = 0
+            $lives = 3
+            setalpha ( 1 ) 
+            $fade = 0 
+    end
+    end
+    
+    // Draw Level 
+    if $gamemode == 2
+        
+        $x=3*16
+        $y=16*20 
+        _readmap()
+        $dead = 0
+        $jump = 0
+        $alive = 0
+        
+        if $fade > 100
+            $gamemode = 3
+        else
+            $fade = $fade + 1
+            // setalpha ( $fade/100 )
+            _newdraw(16,16)
+            
+        end
+        
+    end 
+    // Main Game Loop
+    if $gamemode == 3
+        _newdraw(16,16)
+        //_checkswater()
+
+        if $alive == 0 
+            _mainchap() 
+        else
+            $alive = $alive + 1
+        end
+        if $dia == $maxdia 
+            $gamemode = 9 
+        end
+        if $alive > 50 then $gamemode = 5 end
+        _moveobjs()        
+        //_reportmoust()
+    end
+    // end game. 
+    if $gamemode == 4
+
+
+
+    end
+// Dies
+    if $gamemode == 5
+        $alive = 0
+        $lives = $lives - 1
+        if $lives >= 0
+            $x=3*16
+            $y=16*20 
+            $jump = 0
+            $gamemode = 3
+        else
+            $fade = 100 
+            $gamemode = 6
+        end
+        
+	end
+// Game Over
+	if $gamemode == 6
+        
+        if $fade == 0
+                $gamemode = 1
+
+        else
+            $fade = $fade - 1
+             setalpha ( $fade/100 )
+            _newdraw(16,16)
+            
+        end
+        
+	end
+// Game Complete
+	if $gamemode == 7
+        
+         if $fade < 255
+        setalpha ( $fade/100 )
+        $fade = $fade +1 
+    end
+    if $fade > 299
+        setalpha ( (400-$fade)/100 )    
+          $fade = $fade +1 
+    end    
+        drawImage( $winner, 48, 8, false  )  
+        if getControls().isLeftClick() or getControls().isKeyDown( :space )
+            $fade = 300
+        end 
+   
+        if $fade > 400
+        $gamemode = 1
+        $fade = 0
+    end    
+        
+ 
+            
+            
+            
+	end
+// draw new level
+	if $gamemode == 9
+
+        if $fade == 0
+            $level = $level + 1
+            if $level < 4
+                $gamemode = 2
+            else
+                $gamemode = 7
+            end
+        else
+            $fade = $fade - 1
+             setalpha ( $fade/100 )
+            _newdraw(16,16)
+            
+        end
+
+
+	end
+
+end
+
+def _mainchap()
+    move = 0 
+    x2 = (($x/32).ceil())
+    y2 = ((($y)/16).ceil())
+   
+    t1 = ($y/32).ceil()
+    t2 = ($y/16) 
+    
+    bx = ((x2-1)*32)+48
+    by = ((y2-3)*16)+64
+   // drawImage ($sprites,16, 0, 16, 8, bx, by ,32,16 )
+    
+    if $map2[y2-3][x2-2] > 0 and (t1 - t2) < .1
+        ground = 1
+        
+    else
+        ground = 0
+    end
+    if  $map2[y2-4][x2-2] == 4 //or $map2[y2-3][x2-2] == 4 or $map2[y2-2][x2-3] == 4 or $map2[y2-2][x2-2] == 4
+        $dia = $dia + 1    
+        $map2[y2-4][x2-2] = 0
+    end
+
+    if ground == 1
+    if getControls().isKeyDown( :d ) or  getControls().isKeyDown( :right ) 
+        //if $map2[y2-3][x2-1] != 1 
+            move = 1
+            d = 0
+        //end
+    end 
+    if getControls().isKeyDown( :a ) or  getControls().isKeyDown( :left ) 
+        //if $map2[y2-3][x2-3] != 1 
+            move = 1
+            d = 1
+        //end
+    end 
+end
+    if getControls().isKeyDown( :w ) or  getControls().isKeyDown( :up ) 
+        if $map2[y2-4][x2-2] > 1 then $y = $y - 1 end
+    end 
+    if getControls().isKeyDown( :s ) or  getControls().isKeyDown( :down ) 
+        if $map2[y2-4][x2-2] > 1 and $map2[y2-3][x2-2] != 1 then $y = $y + 1 end
+    end 
+
+ 
+    
+    if ground == 0 and $jump < 1
+        $y=$y+1
+    end
+    //fillText ($map2[y2-2][x2-3]+" "+$jump," ",10, 28 )
+    
+
+    if move == 1
+        if d == 0 then $x = ($x + 2).limit(48,480+48) end
+        if d == 1 then $x = ($x - 2).limit(48,510+48) end
+        $anim[0]=$anim[0]+1
+        $anim[0]=$anim[0].wrap( 0, 8 )
+    else
+        $anim[0]=0
+    end
+    
+    if $y>400
+        $alive = $alive + 1  
+    end 
+    
+    if d == 1
+        if $anim[0]<4
+            drawImage( $mainsprite, 48, 0, 16, 16, $x, $y+2, 32, 32, false  )
+        else    
+            drawImage( $mainsprite, 64, 0, 16, 16, $x, $y+2, 32, 32, false  )
+        end        
+    else
+        if $anim[0]<4
+            drawImage( $mainsprite, 0, 0, 16, 16, $x, $y+2, 32, 32, false  )
+        else
+            drawImage( $mainsprite, 16, 0, 16, 16, $x, $y+2, 32, 32, false  )
+        end
+        
+    end
+
+end
+
+def _moveobjs()
+    obj = 1
+        while obj < $maxobj 
+                    _comp(obj)
+                    //_objs(obj)
+            obj = obj + 1
+        end 
+
+end
+
+
+
+def _objs(obj)
+    //drawImage($ducksprite, 0, 0, 16, 32, $ox[obj], $oy[obj], false  )
+    //drawImage( $mainsprite, 0, 32, 32, 32, $ox[obj],  $oy[obj], false  )
+end
+
+def _comp(obj)
+
+      
+        if $fireloc[obj] < 0 
+            $fireloc[obj] = $fireloc[obj] + 1   
+            $anim[obj]=0
+        end
+       if $fireloc[obj] == 0 
+            $fireloc[obj] = 5+(rand( 1, 600 ).ceil())
+            
+       end
+       if $fireloc[obj] > 0 
+           $anim[obj]=$anim[obj]+1
+            $anim[obj]=$anim[obj].wrap( 0, 8 )
+            y2 = (($oy[obj]/16).ceil())
+            if $ox[obj]+1 == $fireloc[obj] or $ox[obj]-1 == $fireloc[obj]
+               $fireloc[obj] = $ox[obj]
+            end
+            if $ox[obj] < $fireloc[obj]    
+                $d[obj] = 0
+                x2 = ((($ox[obj]+1)/32).ceil())
+                if $map2[y2-2][x2-2] != 0 
+                    $ox[obj] = $ox[obj] + 1                   
+                else
+                    $fireloc[obj] = 0  
+                end
+            end 
+            if $ox[obj] > $fireloc[obj] 
+                $d[obj] = 1
+                x2 = ((($ox[obj]-1)/32).ceil())
+                if $map2[y2-2][x2-2] != 0 
+                    $ox[obj] = $ox[obj] - 1
+  
+                else
+                    $fireloc[obj] = -(rand( 1, 100 ).ceil())
+                end
+            end 
+
+             if $ox[obj] == $fireloc[obj] 
+                 
+                $fireloc[obj] = -(rand( 1, 100 ).ceil()) 
+           end 
+            
+        end
+        
+        if $col2.isPixelOverlap( $x, $y, $col1, $ox[obj], $oy[obj], false )
+            //$gamemode = 5
+            $alive=$alive+1
+        end
+        setcolor(255,0,0)
+        if $d[obj]== 0 
+            if $anim[obj]<4
+            drawImage( $mainsprite, 0, 0, 16, 16, $ox[obj], $oy[obj]+2, 32, 32, false  )
+        else    
+            drawImage( $mainsprite, 16, 0, 16, 16, $ox[obj], $oy[obj]+2, 32, 32, false  )
+         end
+        end
+        if $d[obj] == 1
+            if $anim[obj]<4
+            drawImage( $mainsprite, 48, 0, 16, 16, $ox[obj], $oy[obj]+2, 32, 32, false  )
+        else    
+            drawImage( $mainsprite, 64, 0, 16, 16, $ox[obj], $oy[obj]+2, 32, 32, false  )
+            end
+        end
+        setcolor(:white)
+            //$buildImg.isPixelOverlap( 28+(builds*48), 387-(bHeight*32), $imgbomb , $bombX, $bombY, false ))
+//Checks
+    
+end 
+
+def _readmap()
+    obj = 1
+    $maxdia = 0
+    $dia = 0
+    mapIMG = $level_images[$level]
+   
+    x = 0 
+        y = 0
+        while y < 25
+            arr = x+(y*40)
+            $map[arr] = 0
+            obj2 = 0 
+            itm = 0 
+            pixel = mapIMG.getpixel(x,y)
+            if pixel == -16731136
+                $map[arr] = 1
+            end
+            if pixel == -3866427 
+                if $map[arr-1] == 2
+                    $map[arr] = 3
+                else
+                    $map[arr] = 2
+                end
+            end
+
+
+            if pixel == 16774400-16777216 
+                $map[arr] = 4
+                $maxdia = $maxdia + 1
+            end
+            
+            if pixel == 16711680-16777216
+                $fireloc[obj] = 0
+                $ox[obj]=(x*32)+48
+                $oy[obj]=(y*16)+64
+                obj = obj + 1 
+                $d[obj] = 0 
+                $anim[obj] = 0
+            end
+
+            $map2[y][x] = $map[arr] 
+            x = x + 1
+            if x == 17
+                x = 0
+                y = y + 1
+            end
+            //$maxdia = $level_dia[$level]
+            $maxobj = obj
+        end            
+end 
+    
+def _newdraw(bs,nn)
+        //$water=$water+1
+        //if $water > 21
+        //    $water = 0
+        //end
+        //anim = ($water/3).ceil()
+        setcolor(:white)
+          drawImage( $levg, 48, 8,  false  )  
+        x = 0 
+        y = 0
+        while y < 25  
+            //bs = 16
+            //nn = 16
+            bx = (x*32)+48
+            by = (y*16)+64
+            
+            if $map2[y][x]==1 
+                //drawImage ($sprites,16, 0, 16, 8, bx, by ,32,16 )
+                drawImage ($sprites,16, 0, 32, 16, bx, by ,32,16 )
+            end
+            if $map2[y][x]==2
+               drawImage ($sprites, 48, 0, 32, 16, bx, by ,32,16 )
+            end
+            
+            if $map2[y][x]==3
+              //  drawImage ($sprites, 16, 0, 8, 8, bx, by ,16,16 )
+            end              
+            
+            if $map2[y][x]==4
+                drawImage ($sprites, 80, 0, 16, 16, bx+12, by ,16,16 )
+               // drawImage ($sprites, 24, 0, 8, 8, bx, by ,16,16 )
+ 
+                //drawImage ($sprites, 16, 96, bs, bs, bx, by ,nn,nn  )
+            end       
+          
+            x = x + 1
+            if x >= 39
+                x = 0
+                y = y + 1
+            end
+        end
+        drawImage ($numbs, ($level+1)*16, 0, 16, 16, 120+48, 10+8 ,16,16 )
+        drawImage ($numbs, ($lives+1)*16, 0, 16, 16, 300+48, 10+8 ,16,16 )
+        drawImage ($numbs, $dia*16, 0, 16, 16, 487+48, 10+8 ,16,16 )
+end    
+
+

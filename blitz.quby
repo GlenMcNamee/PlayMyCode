@@ -1,0 +1,266 @@
+/* 
+ * City Blitz PlayMyCode Version 0.10a
+ * Based on Obscure Blitz Amiga based on Blitz Vic-20 by Commodore UK
+ *
+ * Project to learning coding after not coding anything since 1997
+ * Code by Glen McNamee - c64glen.com - @glenmcnamee
+ * Graphics Paul Hume - @ramblingpaul 
+ * Music by Anthony Putson - orchestralmedia.co.uk - @anthonyputson
+ * 
+ */
+
+
+//Define varibles
+setFont( 'Trebuchet MS', 32, 'italic' )
+lastMouseX = 0
+
+
+// Graphics and Sound
+mainImg        = new Image( "Bi Plane 1.2.png" )
+mainImgR       = new Image( "Bi Plane 1.2 LEFT.png" )
+buildImg        = new Image( "building1.0.png" )
+bombImg        = new Image( "Bomb Medium.png" )
+exploImg        = new Image( "ExplosionSpriteSheet.png" )
+
+//fire = new Sound( '44072explosion.mp3')
+music = new Sound( 'mod.blitztime2!_T01_MIX.mp3' )
+
+// Title Screen
+
+// main loop
+gamemode = 0    
+onEachFrame() do
+    // titlescreen
+    if gamemode == 0
+        _clearvars(music)
+        _drawbackground()
+        fillText( "Obscure Blitz!", 200, 160 )
+        fillText( "Press stuff to start", 200, 180 )
+        if getControls().isLeftClick() or getControls().isKeyDown( :space )
+            gamemode =1
+        end 
+    end
+
+// Main Game Loop
+    if gamemode == 1
+        // Draw Background
+        _drawbackground()
+        // Draw buildings
+        _builds(buildImg)
+        // #title text (and score)
+        
+        // Check Movements (and Bomb)
+        
+ 
+        if $PlaneC < 1
+            // Move Plane left/right
+            _moveplane()
+            // land plane if level complete
+                
+            // Draw Plane
+            _drawplane(mainImg,mainImgR)
+        end
+        
+        if $bombD < 1
+            // if space/mouse launch bomb
+            _checkbomb()
+        else
+            // move bomb one down
+            // Draw Bomb
+            _drawbomb(bombImg)
+        end
+ 
+        // Check Collusions
+        _coldetect()
+               // if plane crash, then explosion - game over
+        if $ExoD > 0                   
+            _exo(exploImg)           
+        end
+                   
+               // if bomb crash, then explosion - remove building tile
+
+       // explosions and effects
+
+       // check level complete
+        if $exoD < 1 and $PlaneC > 0 
+            gamemode = 2
+        end
+        if $buildH[0]+$buildH[1]+$buildH[2]+$buildH[3]+$buildH[4]+$buildH[5]+$buildH[6]+$buildH[7]+$buildH[8] < 1 and $exoD < 1  
+             gamemode = 3
+        end 
+    end
+    
+    // End Screen - Congrats (back to Loop) or Game over
+        
+    // Death
+    if gamemode == 2
+        _drawbackground()
+        fillText( "DID HE DIED?", 200, 160 )
+        fillText( "You suck.", 120, 180 )
+        if getControls().isLeftClick() or getControls().isKeyDown( :space )
+            gamemode = 0
+        end 
+    end    
+    
+    // Win
+    if gamemode == 3
+        _drawbackground()
+        fillText( "You win?", 200, 160 )
+        fillText( "I haven't made anymore levels", 120, 180 )
+        fillText( "so you've won!", 120, 200 )
+        if getControls().isLeftClick() or getControls().isKeyDown( :space )
+            gamemode = 0
+        end 
+    end   
+        
+end
+
+       
+
+      
+
+
+
+// Functions -
+
+def _clearvars(music)
+    music.play()
+    $planeX = -64
+$planeY = 32
+$planeD = 1
+//$buildH = [9,9,9,9,9,9,9,9,9]
+$buildH = [1,2,2,3,4,4,4,5,1]
+$bombD = 0 
+$ExoD = 0
+$ExoX = 0
+$ExoY = 0
+$PlaneC = 0
+end
+
+// Draw pretty colours in background
+def _drawbackground
+    LineY=0
+    while LineY < 380
+    if 
+        lineY <190
+            setColor( LineY*1,0,0)
+        else
+            setColor( 190-(LineY-190),0,0)
+        end     
+        
+    drawLine( 0, LineY, 620, LineY)
+    lineY = LineY +1   
+    end
+    
+    LineY=380
+    while LineY < 400
+    setColor(0,((LineY-380)*8),0)
+    drawLine( 0, LineY, 620, LineY)
+    lineY = LineY +1   
+    end
+
+end
+
+// draw the old buildings
+def _builds(buildImg)
+    setColor(255,255,255)
+        buildS = 0
+    loop  
+        bHeight = 0
+        while bHeight < $buildH[buildS]
+        drawImage( buildImg, 25+(builds*64), 360-(bHeight*30), false )
+        bHeight = bHeight +1 
+        end 
+        buildS = buildS + 1
+        
+    end until buildS > 8
+end
+
+// Move Plane 
+def _moveplane()
+        if $planeD > 0 
+            $planeX = $planeX +3 
+        else
+            $planeX = $planeX -3 
+        end    
+        if $planeX > 644 
+            $planeD = 0
+            $planeY = $planeY + 20
+        end  
+        if $planeX < -64
+            $planeY = $planeY + 20
+            $planeD = 1
+        end  
+        
+end
+
+// Draw Plane  
+def _drawplane(mainImg,mainImgR)
+        if $planeD > 0
+            drawImage( mainImg, $planeX, $planeY, false )
+        else
+            drawImage( mainImgR, $planeX, $planeY, false )
+        end 
+end
+
+// Bomb
+def _checkbomb()
+    if getControls().isLeftClick() or getControls().isKeyDown( :space )
+        $bombD = 1
+        $bombX = $planeX 
+        $bombY = $planeY + 20
+     end
+
+end        
+def _drawbomb(bombImg)
+    $bombY = $bombY + 2
+    drawImage( bombImg, $bombX, $bombY, false )
+    if $bombY > 360 
+        $bombD = 0
+    end     
+end         
+
+def _coldetect()
+        //Collision detection.
+    
+    NumBuilds = 0
+    buildS = 0
+    loop  
+
+        if $bombD > 0 and isRectOverlap( $bombX+8, $bombY, 10, 21,         30+((builds)*64), 360-(($buildH[buildS]-1)*30), 60, 30,  false )
+
+            $buildH[buildS] = $buildH[buildS] - 1
+            $bombD = 0 
+            $ExoX = $bombX-48
+            $ExoY = $bombY-32
+            $ExoD = 1 
+
+        end
+        NumBuilds = NumBuilds + $buildH[buildS]
+        if $PlaneC < 1 and   isRectOverlap( $planeX, $planeY, 64,21,         30+((builds)*64), 360-(($buildH[buildS]-1)*32), 60, 30,  false )
+        
+        $PlaneC = 1
+            $ExoX = $planeX
+            $ExoY = $planeY-40
+            $ExoD = 1 
+
+                    
+        end
+    buildS = buildS + 1
+    end until buildS > 8
+end
+
+def _exo(exploImg)
+      drawImage( exploImg, ($ExoD-1)*120, 0, 120, 120, $ExoX, $ExoY )
+    //drawImage( exploImg, 120, 0, 120, 120, ExoX, ExoY )
+    $ExoD = $ExoD + 1
+    if $Exod > 10 
+        $ExoD = 0
+    end
+end
+
+
+// - Explosion with particle effects
+// - dropping bombs out of plane
+// - rotating bomb as falling
+// - fade bitmap text with opacity,

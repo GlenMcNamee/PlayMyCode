@@ -1,0 +1,320 @@
+/* 
+ * Hex Invaders
+ * Another horrible botched up #OneGameAMonth project from Glen McNamee. Sorry! 
+ *
+*/
+
+$highscore = 0 
+$gamemode =0 
+$sprites = new Image( "hex invaders.png" )
+$shipimg = new Image( "ship.png" )
+$bulletimg = new Image( "bullet.png" )
+$exoimg = new Image( "exo.png" )
+
+    
+onEachFrame() do
+    fill( :black )
+    if $gamemode == 0 _title() end 
+    if $gamemode == 1 _setup() end 
+    if $gamemode == 2 _game() end
+    if $gamemode == 3 _endgame() end
+end
+
+def _title()
+    setFont( 'Arial', 32  )
+    drawText( "Hex Invaders", 32, 200);
+    setFont( 'Arial', 14  )
+    drawText( "Made by Glen McNamee in a couple of Hours ", 32, 235);
+    drawText( "Press Space to Start", 32, 250);
+    drawText( "Hi Score "+$highscore+" ", 520, 380);
+    controls = getControls()
+    if controls.isKeyPressed(:space)
+        $gamemode = 1 
+    end
+end 
+
+def _setup()
+    $dead = 0 
+    $ti = 0
+    $trigger = 50
+    $score = 0
+
+    $player = new Player(0)
+    $npc = []
+    $bullet = []
+    //$bullet = [ new Bullet( 0, 0, 1  ) ]
+    //$npc = [ new NPC( 600, -32 ) ]
+    $gamemode = 2
+end 
+
+def _scores()
+    setFont( 'Arial', 14  )
+    drawText( "Score "+$score+" ", 8, 380);
+    drawText( "Hi Score "+$highscore+" ", 520, 380);
+end
+
+
+def _endgame()
+    setFont( 'Arial', 32  )
+    drawText( "You died", 32, 200);
+
+    _scores()
+    _bullet()
+    _npc()
+    $ti = $ti + 1
+    if $ti > 500
+        $ti = 0
+        $gamemode = 0
+    end
+end 
+
+
+def _game()
+    _scores()
+    
+    _player()
+    _bullet()
+    _npc()
+    $ti = $ti + 1
+    if $ti > 8+$trigger and rand (0,$trigger).ceil() == 1
+
+        $ti = 0
+   
+        $npc.add (new NPC( 600, -32 ) )
+    end
+end 
+
+def _player()
+    $player.move()
+    $player.draw()
+    $player.checkHasHitABomb($bullet)    
+end 
+
+def _npc()
+    $npc.each() do | NPC |
+        npc.move()
+        npc.draw()
+        npc.checkHasHitABomb($bullet)
+    end
+end
+
+def _bullet()
+    $bullet.each() do | bullet |
+        bullet.move()
+        bullet.draw()
+    end
+end
+
+
+class Player
+    def new( image )
+       // @image = image
+
+        @positionX = 310-16
+        @positionY = 332
+
+        @direction = "none"
+        @speed = 4
+        @score = 0
+        @isAlive = true
+    end
+
+    def draw()
+        if( @isAlive )   //Only draw him if he's alive
+            //drawImage( @image, @positionX, @positionY )
+            drawImage ( $sprites, 0, 0, 32, 32, @positionX, @positionY )
+        end
+    end
+    
+    def move()   //This updates his co-ordinates to make him move
+        if( @isAlive )   //Only move him if he's alive
+            controls = getControls()
+            if controls.isKeyDown( "d" )
+                @positionX = @positionX + @speed
+
+            else if controls.isKeyDown( "a" )
+                @positionX = @positionX - @speed
+            end
+            if controls.isKeyPressed(:space)
+         
+                $bullet.add (new Bullet( @positionX,  @positionY-16, 1 ) )
+            end
+            @positionX = @positionX.limit(0,620-32)
+        end
+    end
+    
+    def checkHasHitABomb( Bullet )   
+    if( @isAlive ) 
+        hasBombBeenHit = false
+
+        $Bullet.each() do |Bullet|
+            if(
+                $shipimg.isPixelOverlap( @positionX, @positionY, $bulletimg, Bullet.getPositionX(), Bullet.getPositionY() )
+
+                ) and ( Bullet.getdirection() == -1 )
+                @isAlive = false
+                Bullet.kill()
+                $gamemode = 3
+            end
+        end
+        $NPC.each() do |NPC|
+            if(
+                $shipimg.isPixelOverlap( @positionX, @positionY, $shipimg, NPC.getPositionX(), NPC.getPositionY() )
+
+                ) 
+                @isAlive = false
+                NPC.kill()
+                $gamemode = 3
+            end
+        end
+    
+    
+    
+    end
+    
+    
+    
+    end
+
+end
+
+
+class NPC 
+      def new( X, Y )
+       // @image = image
+        @trigger = $trigger*2
+        @positionX = X
+        @positionY = Y
+        @direction = -1
+        @speed = 4 
+        @anim = 0
+        @isAlive = true
+    end  
+    
+    def move()   //This updates his co-ordinates to make him move
+        if( @isAlive )   //Only draw him if he's alive
+        
+            @positionX = @positionX + (@direction * @speed)
+
+            if @positionX < 0
+                 @direction = 1
+                @positionY = @positionY + 32
+            end
+            if @positionX > 610-16
+                 @direction = -1
+                @positionY = @positionY + 32
+            end
+            if rand (0,@trigger).ceil() == 1 
+                    // @positionX = @positionX - @speed               
+                    $bullet.add (new Bullet( @positionX,  @positionY+16, -1 ) )
+            end
+        end
+    end
+    
+    def draw()
+        if( @isAlive )   //Only draw him if he's alive
+            //drawImage( @image, @positionX, @positionY )
+            if @anim < 9
+                drawImage ( $sprites, 32, 0, 32, 32, @positionX, @positionY )
+            else
+                drawImage ( $sprites, 64, 0, 32, 32, @positionX, @positionY )
+            end
+            @anim = @anim + 1
+            if @anim == 17 then @anim = 0 end
+        end
+    end    
+    
+    def checkHasHitABomb( Bullet )   
+                if( @isAlive ) 
+    hasBombBeenHit = false
+
+    $Bullet.each() do |Bullet|
+        if(
+            isRectOverlap( @positionX, @positionY, 32, 32,
+            Bullet.getPositionX(), Bullet.getPositionY(), 32, 32)
+        ) and ( Bullet.getdirection() == 1 )
+           @isAlive = false
+           Bullet.kill()
+                   $trigger = ($trigger - 1).limit( 10,100)
+             $score = $score + 1
+            if $score > $highscore 
+                $highscore = $score
+            end
+        end
+    end
+    
+
+    
+end 
+
+end
+    
+    def getPositionX()
+        if( @isAlive )   
+        return @positionX
+        end
+    end
+
+    def getPositionY()
+        if( @isAlive )   
+        return @positionY
+        end
+    end
+    
+        
+    def kill()
+        @isAlive = false
+    end
+    
+end 
+
+class Bullet
+    def new( BX, BY, D )
+       // @image = image
+
+        @positionX = BX
+        @positionY = BY
+        @direction = D
+        @speed = 4 
+
+        @isAlive = true
+    end
+    
+    def move()   //This updates his co-ordinates to make him move
+        if( @isAlive )   //Only move him if he's alive    
+            @positionY = @positionY - (@speed*@direction) 
+        end
+        if @positionY < 0 or @positionY > 400
+             @isAlive = false
+        end
+    end
+    
+    def draw()
+        if( @isAlive )   //Only draw him if he's alive
+            //drawImage( @image, @positionX, @positionY )
+            drawImage ( $sprites, 96, 0, 32, 32, @positionX, @positionY )
+        end
+    end
+    
+    def kill()
+        @isAlive = false
+    end
+    
+    def getPositionX()
+        if( @isAlive )   
+        return @positionX
+        end
+    end
+
+    def getPositionY()
+        if( @isAlive )   
+        return @positionY
+        end
+    end
+        def getdirection()
+            if( @isAlive )   
+        return @direction
+    end
+    end
+    
+end

@@ -1,0 +1,325 @@
+/* 
+ *  EXPERIMENTAL VERSION 
+ * 
+ * 
+ * SnowBall Sunday PlaymyCode conversion by Glen McNamee - c64glen.com - @glenmcnamee
+ * Originally by Ash+Dave http://noname.c64.org/csdb/release/?id=6642
+ *
+ */
+
+setFont( 'Arial', 32, 'italic' )
+
+$background       = new Image( "mockup-background.png" )
+$snowball      = new Image( "snow" )
+
+$col      = new Image( "1.png" )
+$col2      = new Image( "4.png" )
+
+$sprites  = new Image( "fullsidesprites.png" )
+$sprites2  = new Image( "fullsidesprites2.png" )
+$ui  = new Image( "ui2.png" )
+$button  = new Image( "button-1.png" )
+$button2  = new Image( "button2.png" )
+
+
+$players = 3
+$humon = [1,0,0]
+$move = [0,0,0]
+$snow = [0,0,0]
+$d = [0,0,0]
+$x = [150,350,450,250,50,50]
+$mm = [1,1,1]
+$ball = [0,0,0]
+$bx = [0,0,0]
+$by = [0,0,0]
+$bd = [0,0,0]
+$bm = [0,0,0]
+$fireloc = [0,0,0]
+$score= [0,0,0]
+
+
+// Main Loop. 
+onEachFrame() do
+    drawImage( $background  , 0, 0, false )
+    // Player Loop
+    ply = 0
+    while ply < $players    
+        // Check Controls
+        if $humon[ply] == 1 
+             // Humon Controls 
+            _humon(ply)
+        else
+            // Computer controls. 
+            _comp(ply)
+        end 
+        // Move Chaps
+        _movechaps(ply)
+        // Move snowball
+        if $ball[ply] == 1
+            _snowball(ply)
+        end
+        // Draw Chaps
+        _drawchaps(ply)
+        // Draw Snow Balls
+        if $ball[ply] == 1 
+            _drawballs(ply)       
+        end
+   
+        // Draw Snow Fall - Still to do.
+        
+        // Increase player number - End Loop
+        ply = ply + 1
+end    
+    
+end
+
+
+def _drawballs(ply)
+    drawImage(  $snowball, $bx[ply], $by[ply], false )
+         // Check Collusions
+        ply2 = 0
+        while ply2 < $players
+            hit = 0
+            if  $snowball.isOverlap( $bx[ply], $by[ply], $col, $x[ply2], 250, false ) and $move[ply2]<2
+                hit =1
+            end 
+            if  $snowball.isOverlap( $bx[ply], $by[ply], $col2, $x[ply2], 250, false ) and $move[ply2]==2
+                hit =1
+            end 
+            
+            if hit==1
+                $ball[ply] = 0
+                if $d[ply2] == $bd[ply] 
+                    $move[ply2] = 4
+                else 
+                    $move[ply2] = 5
+                end
+                $score[ply]=$score[ply]+1
+            end
+        ply2=ply2+1
+        end
+end
+
+def _humon(ply)
+    mc = getControls()
+    setAlpha( 0.5 )
+    drawImage(  $ui, 32, 290, false )
+    setAlpha( 1 )
+    if $move[ply] < 3
+        $move[ply] = 0
+        if getControls().isKeyDown( :d ) or $button2.isOverlap( mc.getMouseX(), mc.getMouseY(), $button, 32+68, 322, false )        
+            $move[ply] = 1
+            $d[ply] = 0
+        end 
+        if getControls().isKeyDown( :a ) or $button2.isOverlap( mc.getMouseX(), mc.getMouseY(), $button, 32+0, 322, false )
+            $move[ply] = 1
+            $d[ply] = 1
+        end 
+        if getControls().isKeyDown( :s ) or  $button2.isOverlap( mc.getMouseX(), mc.getMouseY(), $button, 32+34, 290+68, false )
+            $move[ply] = 2
+        end 
+        if getControls().isKeyDown( :space ) or $button2.isOverlap( mc.getMouseX(), mc.getMouseY(), $button, 32+34, 290, false ) 
+            if $snow[ply] == 1 and $ball[ply] == 0
+                $move[ply] = 3
+            end
+        end 
+    end 
+end 
+
+
+def _snowball(ply)
+    if $bd[ply] == 0 
+        $bx[ply] = $bx[ply] + 4
+    else
+         $bx[ply] = $bx[ply] - 4
+    end
+    $bm[ply] = $bm[ply] + 1
+    
+    if $bx[ply]>616
+        $bx[ply] = $bx[ply] - 632
+    end
+    if $bx[ply]<-16
+        $bx[ply] = $bx[ply] + 632
+    end
+    
+    if $bm[ply] < 5
+        $by[ply] = $by[ply] - 0.5
+    end 
+    if $bm < 10
+        $by[ply] = $by[ply] - 0.4
+    end     
+    if $bm[ply] < 25
+        $by[ply] = $by[ply] - 0.3
+    end 
+    
+    if $bm[ply] > 20 
+        $by[ply] = $by[ply] + 0.3
+    end 
+    if $bm[ply] > 30 
+        $by[ply] = $by[ply] + 0.5
+    end 
+    
+    
+    
+        if $by[ply] > 282
+            $ball[ply] = 0
+            $bm[ply] = 0 
+        end
+end 
+
+def _comp(ply)
+        if $move[ply] < 4
+       if $fireloc[ply] == 0 
+            $fireloc[ply] = 2*(rand( 1, 300 ).ceil())
+        else
+            if $x[ply]+1 == $fireloc[ply] or $x[ply]-1 == $fireloc[ply]
+                $fireloc[ply] = $x[ply]
+            end
+            if $x[ply] < $fireloc[ply]     
+                $move[ply] = 1
+                $d[ply] = 0
+            end 
+            if $x[ply] > $fireloc[ply] 
+                $move[ply] = 1
+                $d[ply] = 1
+            end 
+            if $x[ply] == $fireloc[ply] and $snow[ply] == 0 and $ball[ply] == 0  
+                $move[ply] = 2
+            end 
+            if $x[ply] == $fireloc[ply]  and $snow[ply] == 1 and $ball[ply] == 0
+                $move[ply] = 3    
+            end 
+             if $x[ply] == $fireloc[ply]  and $snow[ply] == 0 and $ball[ply] == 1
+                $fireloc[ply] = 0  
+            end 
+            
+        end
+    end
+end 
+
+def _movechaps(ply)
+     if $move[ply] == 0
+        $mm[ply] = 0
+    end
+    if $move[ply] == 1
+        if $d[ply] == 0 
+            $x[ply] = $x[ply] + 2 
+        else
+             $x[ply] = $x[ply] - 2
+        end
+        $mm[ply] = $mm[ply] + 1
+        if $mm[ply] > 12
+            $mm[ply] = 1
+        end
+    end
+    if $move[ply] == 2
+        $mm[ply] = $mm[ply] + 1 
+        if $mm[ply] > 8
+            $snow[ply] = 1    
+        end     
+            
+    end 
+    if $move[ply] == 3
+        $mm[ply] = $mm[ply] + 1
+        if $mm[ply] > 20
+            $move[ply] = 0 
+            $mm[ply] = 0
+            $snow[ply] = 0
+            $ball[ply] = 1
+            $bm[ply] = 0
+             $fireloc[ply] = 0  
+            if $d[ply] == 0 
+                $bx[ply] = $x[ply]+28
+            else
+                $bx[ply] = $x[ply]-8
+            end 
+            $by[ply] = 254
+            $bd[ply] = $d[ply]
+        end
+    end
+    if $move[ply] == 4 or $move[ply] == 5
+        $mm[ply] = $mm[ply] + 1
+            if $mm[ply] > 100
+                $move[ply] = 0
+            end
+    end 
+    if $x[ply]>616
+        $x[ply] = $x[ply] - 632
+    end
+    if $x[ply]<-16
+        $x[ply] = $x[ply] + 632
+    end
+end
+def _drawchaps(ply)
+   if $move[ply] == 0
+            sp = 0
+        end
+         if $move[ply] == 1 and $mm[ply] > 4
+             sp = 33    
+        end
+         if $move[ply] == 1 and $mm[ply] < 5
+            sp=65 
+        end
+        if $move[ply] == 2 
+            sp = 97      
+        end         
+        if $move[ply] == 3 and $mm[ply] > 10
+            sp = 161
+        end
+         if $move[ply] == 3 and $mm[ply] < 11
+             sp = 129
+            
+        end
+        if $move[ply] == 4 
+            if $mm[ply] < 100
+             sp = 97
+            end          
+            
+            if $mm[ply] < 85
+             sp = 193+64
+            end 
+                if $mm[ply] < 20
+             sp = 193+32
+            end 
+            if $mm[ply] < 10
+             sp = 193
+            end 
+        
+        end
+        
+        if $move[ply] == 5
+            if $mm[ply] < 100
+             sp = 97
+            end          
+            
+            if $mm[ply] < 85
+             sp = 352
+            end 
+                if $mm[ply] < 20
+             sp = 352-32
+            end 
+            if $mm[ply] < 10
+             sp = 352-64
+            end 
+        
+        end
+    
+    // Set diffrent colour for players - horrible, but hey. 
+    
+    if ply == 0 
+        setColor( 255, 255, 255 ) 
+    end
+    if ply == 1 
+        setColor( 255, 250, 128 )
+    end
+    if ply == 2 
+        setColor( 128, 255, 250 )
+    end
+
+    if $d[ply]==0 
+        drawImage( $sprites, sp, 0, 32, 32, $x[ply], 250, false  )
+    else
+        drawImage( $sprites2, 352-sp, 0, 32, 32, $x[ply], 250, false  )
+    end 
+     
+end

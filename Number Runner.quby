@@ -1,0 +1,504 @@
+/* 
+ * Nostalgic Platform Adventure _ Number Runner
+ * By Glen McNamee.
+ * 
+ * 
+ */
+ 
+setFont( 'Arial', 16, 'italic' )
+ 
+
+$gamemode = 0
+
+$fade = 0 
+$map = []
+$d = []
+$dia = 0
+$alive = 0 
+
+$sc = []
+$sc_val = [] 
+
+$sc_loc = [
+ [   111,20 ], 
+  [   327,20 ], 
+ [   470,20 ], 
+  [   146,85 ], 
+  [   325,85 ], 
+ [   398,85 ], 
+  [   111,148 ], 
+  [   327,148 ], 
+ [   470,148 ], 
+  [   111,214 ], 
+  [   327,214 ], 
+ [   470,214 ], 
+ [   183,277 ], 
+  [   371,277 ], 
+ [   470,277 ], 
+   [   218,345 ], 
+  [   357,345 ], 
+ [   435,345 ]
+]
+
+$map3 = [ 
+[0,2,0,0,0,0,0,0,2,0,0,0,0,0,0,0,2,0,0],
+[1,2,1,1,1,1,1,1,2,1,1,1,1,1,1,1,2,1,1],
+[0,2,0,2,0,0,0,0,2,0,0,0,0,0,2,0,2,0,0],
+[1,1,1,2,1,1,1,1,1,1,1,1,1,1,2,1,1,1,1],
+[0,2,0,2,0,0,0,0,0,2,0,0,0,0,2,0,2,0,0],
+[1,2,1,1,1,1,1,1,1,2,1,1,1,1,1,1,2,1,1],
+[0,2,2,0,0,0,0,0,0,2,0,0,0,2,0,0,2,0,0],
+[1,1,2,1,1,1,1,1,1,1,1,1,1,2,1,1,1,1,1],
+[0,0,2,0,2,0,0,0,0,0,2,0,0,2,0,0,2,0,0],
+[1,1,1,1,2,1,1,1,1,1,2,1,1,1,1,1,2,1,1],
+[0,0,0,0,2,0,0,0,0,0,2,0,0,0,0,0,2,0,0],
+[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+   
+]
+
+$newmap = []
+$plyx = 1
+$plyy = 1
+$ox = []
+$oy = []
+$fireloc = []
+$move = []
+$d = []
+$anim = []
+
+$point = 0 
+$terrian  = new Image( "terrian.png" )
+$nr_Sprites  = new Image( "nr_Sprites.png" )
+$p5     = new Image( "p5.png" )
+$colsp     = new Image( "colsp.png" )
+$intro1     = new Image( "intro1.png" )
+$intro2     = new Image( "intro2.png" )
+$1gamlogo     = new Image( "1gamlogo.png" )
+$score_image = [new Image( "p1.png" ),new Image( "p2.png" ),new Image( "p3.png" ),new Image( "p4.png" ),new Image( "p5.png" ),
+    new Image( "p6.png" ),new Image( "p7.png" ),new Image( "p8.png" ),new Image( "p9.png" ),new Image( "p10.png" )]
+$score_score =    [2,3,5,7,9,-2,-3,-5,-7,-9]
+
+
+
+$titlescreen = new Image("titlescreen.png")
+$winner = new Image("winner.png")
+
+
+onEachFrame() do
+    if $gamemode > 0 then fill( 0,128,255) end
+
+    // title screen
+    if $gamemode == 0
+        if $point < 1 
+            $gameTime = getTime()
+            $point = 1
+        end
+
+        $point = (getTime() - $gameTime)/10+1  
+
+        if $point < 174 
+            fill( :white )
+            setColor( :white, $point/175 )
+            drawImage ($intro1, -400+($point*3), 196, false )
+            drawImage ($intro2, 700-($point*3), 240, false )
+        end
+        if $point > 173 and $point < 201
+            fill( :white )
+            drawImage ($intro1, 124, 196, false )
+            drawImage ($intro2, 191, 240, false )
+        end
+        if $point > 200 and $point < 555
+            fill( 455-$point,455-$point,455-$point )
+             setColor( 455-$point,455-$point,455-$point, 1 )
+            drawImage ($intro1, 124, 196, false )
+            drawImage ($intro2, 191, 240, false )
+        end
+        
+        if $point > 555
+            if $point > 555 and $point < 810 
+                setColor( $point-555,$point-555,$point-555, 1 )
+            end
+            if $point > 865 
+                setColor( 1120-$point,1120-$point,1120-$point, 1 )
+            end        
+            drawImage( $1gamlogo, 0, 0 )
+            if $point > 1355 
+                $point = -100
+                $gamemode = 1
+            end
+        end
+    end
+    
+    // Title Screen
+   if $gamemode == 1
+
+       
+       if $fade < 255
+
+           
+        setalpha ( $fade/100 )
+        $fade = $fade +1 
+    end
+    if $fade > 299
+        setalpha ( (400-$fade)/100 )    
+          $fade = $fade +1 
+    end    
+    drawImage( $titlescreen, 0, 0,  false  )  
+        if getControls().isLeftClick() or getControls().isKeyDown( :space )
+            if $fade < 300 
+                $fade = 300
+            else
+                $fade = $fade + 25
+            end
+        end 
+   
+        if $fade > 400
+         $gamemode =2
+            $point = 0
+            $level = 0
+            $lives = 3
+            setalpha ( 1 ) 
+            $fade = 0 
+    end
+    end
+    
+    // Draw Level 
+    if $gamemode == 2
+        
+        $x=3*32
+        $y=9*32 
+        _readmap()
+        $dead = 0
+        $jump = 0
+        $alive = 0
+        
+        if $fade > 100
+            $gamemode = 3
+        else
+            $fade = $fade + 1
+             setalpha ( $fade/100 )
+            _newdraw(16,16)
+            
+        end
+        
+    end 
+    // Main Game Loop
+    if $gamemode == 3
+        _newdraw(16,16)
+        //_checkswater()
+        _score()
+        if $alive == 0 
+            _mainchap() 
+        else
+            $alive = $alive + 1
+        end
+        if $dia == $maxdia 
+            $gamemode = 9 
+        end
+        if $alive > 50 then $gamemode = 5 end
+
+    end
+    // end game. 
+    if $gamemode == 4
+
+
+
+    end
+// Dies
+    if $gamemode == 5
+        $alive = 0
+        $lives = $lives - 1
+        if $lives >= 0
+            $x=3*32
+            $y=10*32
+            $jump = 0
+            $gamemode = 3
+        else
+            $fade = 100 
+            $gamemode = 6
+        end
+        
+	end
+// Game Over
+	if $gamemode == 6
+        
+        if $fade == 0
+                $gamemode = 1
+
+        else
+            $fade = $fade - 1
+             setalpha ( $fade/100 )
+            _newdraw(16,16)
+            
+        end
+        
+	end
+// Game Complete
+	if $gamemode == 7
+        
+         if $fade < 255
+        setalpha ( $fade/100 )
+        $fade = $fade +1 
+    end
+    if $fade > 299
+        setalpha ( (400-$fade)/100 )    
+          $fade = $fade +1 
+    end    
+     drawImage( $winner, 0, 0, false  ) 
+        if getControls().isLeftClick() or getControls().isKeyDown( :space )
+            $fade = 300
+        end 
+   
+        if $fade > 400
+        $gamemode = 1
+        $fade = 0
+    end    
+        
+ 
+            
+            
+            
+	end
+// draw new level
+	if $gamemode == 9
+
+        if $fade == 0
+            $level = $level + 1
+            if $level < 8
+                $gamemode = 2
+            else
+                $gamemode = 7
+            end
+        else
+            $fade = $fade - 1
+             setalpha ( $fade/100 )
+            _newdraw(16,16)
+            
+        end
+
+
+	end
+
+end
+
+def _mainchap()
+    move = 0 
+    
+     c = getControls()
+    
+     
+    nx2 = ((4+$x)/32).ceil()
+    ny2 = ((32+$y)/32).ceil()
+
+
+   
+    t1 = ($y/16).ceil()
+    t2 = ($y/16) 
+    nt1 = (($y)/32).ceil()
+    nt2 = (($y)/32) 
+    
+    if $map3[ny2][nx2] > 0 and (nt1 - nt2) < .3
+        ground = 1   
+    else
+        ground = 0
+    end
+    
+ 
+    if getControls().isKeyDown( :d ) or  getControls().isKeyDown( :right ) 
+            move = 1
+            d = 1
+    end 
+    if getControls().isKeyDown( :a ) or  getControls().isKeyDown( :left ) 
+            move = 1
+            d = 2
+    end 
+    if getControls().isKeyDown( :w ) or  getControls().isKeyDown( :up ) 
+        if $map3[ny2-1][nx2] == 2 
+            $y = $y - 2 
+            move = 1
+            d = 3 
+        end
+    end 
+    if getControls().isKeyDown( :s ) or  getControls().isKeyDown( :down ) 
+        if $map3[ny2-1][nx2] == 2 and $map3[ny2][nx2] == 2 
+            $y = $y + 1 
+                        move = 1
+            d = 3 
+        end
+    end 
+
+ 
+    
+    if ground == 0 and $jump < 1
+        $y=$y+1
+    end
+    //fillText ($map2[y2-2][x2-3]+" "+$jump," ",10, 28 )
+    
+    if getControls().isKeyDown( :space ) and ground == 1
+            $jump = 1
+    end 
+
+    if $jump>0 
+            if $jump < 10
+                 $y = $y - 2.25 
+                 $jump = $jump + 1
+            end
+            if $jump > 9 and $jump < 20
+                    
+                 $jump = $jump + 1
+            end
+            if  $jump > 19
+                $jump = 0
+            end
+    end
+
+    if move == 1
+        if d == 1 then $x = $x + 2 end
+        if d == 2 then $x = $x - 2 end
+        $anim[0]=$anim[0]+1
+        $anim[0]=$anim[0].wrap( 0, 8 )
+    else
+    
+        d = 0
+        $anim[0]=0
+    end
+    
+    if $y>400
+        $alive = $alive + 1
+        
+    end 
+    
+
+
+        
+        if d == 0 then drawImage( $nr_Sprites , 0 , 00, 24, 24, 24+$x, 48+$y, 32, 32, false  ) end
+        if d == 1 or d == 2 
+            if $anim[0] == 0 or $anim[0] == 1 then frane = 0 end
+            if $anim[0] == 2 or $anim[0] == 3 then frane = 24 end
+            if $anim[0] == 4 or $anim[0] == 5 then frane = 48 end
+            if $anim[0] == 6 or $anim[0] == 7 then frane = 72 end
+            drawImage( $nr_Sprites , frane , 00+((d-1)*24), 24, 24, 24+$x, 48+$y, 32, 32, false  ) 
+            
+        end
+        if d == 3 
+            if $anim[0] < 5 then frane = 0 end
+            if $anim[0] > 4 then frane = 24 end
+            drawImage( $nr_Sprites , 96 +frane, 00, 24, 24, 24+$x, 48+$y, 32, 32, false  ) 
+            
+        end
+            
+        
+
+end
+
+
+
+
+
+def _objs(obj)
+    //drawImage($ducksprite, 0, 0, 16, 32, $ox[obj], $oy[obj], false  )
+    //drawImage( $mainsprite, 0, 32, 32, 32, $ox[obj],  $oy[obj], false  )
+end
+
+
+def _readmap()
+    obj = 1
+    $maxdia = 0
+    $dia = 0
+    
+    y = 1
+    while y < 10
+        $sc[y] = rand( 0, 17 ).ceil() 
+        
+        x = 0 
+            while x < y
+            if x== 0 then $sc[y] = rand( 0, 17 ).ceil() end 
+                if $sc[y] == $sc[x] and x != y
+                    x = 0
+                else
+                    x=x+1
+                end
+            end 
+            
+        
+      //  $sc_val[y] =  rand( 0, 9 ).ceil() 
+        y = y + 1
+    end
+    $maxdia = 50 +  $score_score[rand(0,9)] +  $score_score[rand(0,9)] +  $score_score[rand(0,9)] 
+    $dia = 50
+
+   
+     
+end 
+    
+def _newdraw(bs,nn)
+
+        
+        x = 0 
+        y = 0
+        while y < 12  
+            bs = 32
+            nn = 32
+            bx = (x*nn)+4
+            by = (y*nn)+32
+            
+            if $map3[y][x]==1 
+                drawImage ($terrian, 32, 0, bs, bs, bx, by ,nn,nn )
+            end
+            if $map3[y][x]==2
+               drawImage ($terrian, 64, 0, bs, bs, bx, by ,nn,nn )
+            end
+                      
+            x = x + 1
+            if x == 20
+                x = 0
+                y = y + 1
+            end
+        end
+        
+
+        
+        fillText ( "Lives "+$lives,10, 8 )
+        fillText ( "Level "+($level+1),100, 8 )
+        fillText ( "Target "+$maxdia,200, 8 )
+        fillText ( "Score "+$dia,520, 8 )
+end    
+
+def _score()
+        y = 0
+    while y < 10
+        
+        if $p5.isOverlap( $sc_loc[$sc[y]][0], $sc_loc[$sc[y]][1], $colsp, 24+$x, 48+$y, false )
+            
+            $dia = $dia + $score_score[y]
+            
+            x = 0 
+            while x < 10
+            if x== 0 then $sc[y] = rand( 0, 17 ).ceil() end 
+                if $sc[y] == $sc[x] and x != y
+                    x = 0
+                else
+                    x=x+1
+                end
+            end 
+            
+        end
+
+        
+        drawImage ( $score_image[y], $sc_loc[$sc[y]][0], $sc_loc[$sc[y]][1], false )
+        y = y + 1
+
+    end
+end 
+
+def _reportmoust()
+
+    xx = -1+(getControls().getMouseX()/16).ceil()
+    yy = -1+(getControls().getMouseY()/16).ceil()
+                arr = xx+(yy*40)
+
+           fillText( xx , 170, 366 )
+           fillText( yy , 220, 366 )
+          //fillText( $map2[yy][xx]+" "+$level_images[0].getpixel(xx,yy) , 10, 326 )
+
+end 
